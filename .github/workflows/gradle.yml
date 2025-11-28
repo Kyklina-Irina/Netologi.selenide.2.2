@@ -17,10 +17,11 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Start SUT
-        # Запускаем целевой сервис (SUT) в фоновом режиме
-        # Имя файла SUT: app-card-delivery.jar
         run: java -jar ./artifacts/app-card-delivery.jar &
+      # --- НОВЫЙ ШАГ ---
+      - name: Wait for SUT to start
+        run: |
+          timeout 60 bash -c 'until curl -f http://localhost:9999; do sleep 2; done' || exit 1
+      # --- КОНЕЦ НОВОГО ШАГА ---
       - name: Run tests
-        # Запускаем автотесты с флагом -Dselenide.headless=true
-        # Параметр --info также остается
         run: ./gradlew test --info -Dselenide.headless=true
